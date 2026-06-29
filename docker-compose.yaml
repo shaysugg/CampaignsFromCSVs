@@ -121,8 +121,15 @@ services:
       retries: 5
       start_period: 30s
     restart: unless-stopped
+  
+  # prometheus:
+  #   image: prom/prometheus
+  #   ports:
+  #     - 9090:9090
+  #   volume: prometheus_data:/etc/prometheus/prometheus.yml
 
 volumes:
   postgres_data:
   redis_data:
   rabbitmq_data:
+  prometheus_data:
