@@ -1,0 +1,132 @@
+services:
+  api:
+    build:
+      context: .
+    container_name: api
+    ports: 
+      - 8000:8000
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    develop:
+      watch:
+        - action: sync+restart
+          path: .
+          target: /app
+        - action: rebuild
+          path: requirements.txt
+    
+
+  celery-worker:
+    container_name: celeryworker
+    build:
+      context: .
+    command: ["celery", "-A", "app.tasks:c", "worker", "-l", "INFO"]
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./app/tasks.py
+          target: /app
+        - action: rebuild
+          path: requirements.txt
+    
+
+  
+  celery-beat:
+    container_name: celerybeat
+    build:
+      context: .
+    command: ["celery", "-A", "app.tasks:c", "beat", "-l", "INFO"]
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      celery-worker:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      - RABBITMQ_DEFAULT_HOST=${RABBITMQ_HOST}
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./app/tasks.py
+          target: /app
+        - action: rebuild
+          path: requirements.txt
+    
+
+  rabbitmq:
+    image: rabbitmq:3
+    hostname: rabbit
+    container_name: rabbitmq
+    ports:
+      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"    # AMQP port
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST}
+      - RABBITMQ_DEFAULT_HOST=${RABBITMQ_HOST}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
