@@ -17,13 +17,13 @@ c = Celery(config_source="app.celeryconfig")
 def setup_tasks(sender: Celery, **kwargs):
 
     sender.add_periodic_task(
-        10,
+        600,
         check_campaigns_need_to_start.s(),
         name="check_campaigns_need_to_start",
     )
 
     sender.add_periodic_task(
-        10,
+        600,
         check_campaigns_need_to_mark_complete.s(),
         name="check_campaigns_need_to_mark_complete",
     )
