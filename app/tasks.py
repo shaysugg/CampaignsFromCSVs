@@ -139,7 +139,7 @@ def logger() -> logging.Logger:
 # todo: retry
 @c.task
 def send_email(dest_email: str, content: str, campaign_id: int):
-    # todo
+    # todo: implement sending email
     redis = get_redis()
     sleep(0.2)
     l = logger()
