@@ -10,8 +10,9 @@ redis_url = os.getenv("REDIS_URL")
 redis_port = os.getenv("REDIS_PORT")
 redis_db = os.getenv("REDIS_DB")
 
-# broker_url = f"amqp://{rabbitmq_user}:{rabbitmq_pass}@{rabbitmq_host}:{rabbitmq_port}/{rabbitmq_vhost}"
-broker_url = f"redis://{redis_url}:{redis_port}/{redis_db}"
+broker_url = f"amqp://{rabbitmq_user}:{rabbitmq_pass}@{rabbitmq_host}:{rabbitmq_port}/{rabbitmq_vhost}"
+# change to redis if rabbitmq is overkill
+# broker_url = f"redis://{redis_url}:{redis_port}/{redis_db}"
 result_backend = f"redis://{redis_url}:{redis_port}/{redis_db}"
 accept_content = ["json"]
 task_serializer = "json"
