@@ -1,11 +1,6 @@
-from functools import cache
-
-import pytest
-import redis
-from sqlmodel import Session, create_engine
+from sqlmodel import create_engine
 import app.db as db
 from app.models import Campaign, Recipiet
-import app.tasks as tasks
 from app.tasks import check_campaigns_need_to_mark_complete
 
 mock_db_engine = create_engine("sqlite:///:memory:")
@@ -27,7 +22,6 @@ def test_check_campaigns_need_to_mark_complete(monkeypatch, session, redis):
 
     monkeypatch.setattr(db, "get_session", mock_session)
     monkeypatch.setattr(db, "get_redis", get_mock_redis)
-    # monkeypatch.setattr(tasks, "send_email", mock_send_email)
     c = Campaign(name="test", content="", state=1, schedule_at=None)
 
     session.add(c)

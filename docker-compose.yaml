@@ -7,8 +7,8 @@ services:
       - 8000:8000
     command: [ "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000" ]
     depends_on:
-      # rabbitmq:
-      #   condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:
@@ -29,8 +29,8 @@ services:
       context: .
     command: [ "celery", "-A", "app.tasks:c", "worker", "-l", "INFO" ]
     depends_on:
-      # rabbitmq:
-      #   condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:
@@ -55,8 +55,8 @@ services:
       context: .
     command: [ "celery", "-A", "app.tasks:c", "beat", "-l", "INFO" ]
     depends_on:
-      # rabbitmq:
-      #   condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
       redis:
         condition: service_healthy
       celery-worker:
@@ -73,26 +73,26 @@ services:
         - action: rebuild
           path: requirements.txt
 
-  # rabbitmq:
-  #   image: rabbitmq:3
-  #   hostname: rabbit
-  #   container_name: rabbitmq
-  #   ports:
-  #     - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"    # AMQP port
-  #     - "15672:15672"
-  #   environment:
-  #     - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
-  #     - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
-  #     - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST}
-  #     - RABBITMQ_DEFAULT_HOST=${RABBITMQ_HOST}
-  #   healthcheck:
-  #     test: ["CMD", "rabbitmq-diagnostics", "ping"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #     start_period: 30s
-  #   volumes:
-  #     - rabbitmq_data:/var/lib/rabbitmq
+  rabbitmq:
+    image: rabbitmq:3
+    hostname: rabbit
+    container_name: rabbitmq
+    ports:
+      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"    # AMQP port
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST}
+      - RABBITMQ_DEFAULT_HOST=${RABBITMQ_HOST}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 
 
   postgres:
@@ -121,12 +121,6 @@ services:
       retries: 5
       start_period: 30s
     restart: unless-stopped
-  
-  # prometheus:
-  #   image: prom/prometheus
-  #   ports:
-  #     - 9090:9090
-  #   volume: prometheus_data:/etc/prometheus/prometheus.yml
 
 volumes:
   postgres_data:
