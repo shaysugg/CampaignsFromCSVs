@@ -1,3 +1,4 @@
+## Campaigns From CSVs
 This is a sample project designed to become more familiar with backend background tasks. It demonstrates scheduling campaigns, importing recipients from CSV files, and sending emails to each recipient when a campaign is started. It has:
 
 * CRUD operations for campaigns
@@ -6,7 +7,29 @@ This is a sample project designed to become more familiar with backend backgroun
 * Schedule Celery tasks for checking which campaigns need to be started and which ones are finished
 * Containerized with Docker. Simply run docker compose up -d
 
-**Tech Stack:**
+### How to run
+Create an .env file in the root project directory for base setup that has these values.
+```
+REDIS_URL=redis
+REDIS_PORT=6379
+REDIS_DB=0
+
+RABBITMQ_PORT=567
+RABBITMQ_HOST=rabbitmq
+RABBITMQ_PASSWORD=RABBITMQ_PASSWORD
+RABBITMQ_USERNAME=RABBITMQ_USERNAME
+RABBITMQ_VHOST=myvhost
+
+DB_PORT=5432
+DB_HOST=postgres
+DB_PASSWORD=DB_PASSWORD
+DB_USERNAME=postgres
+DB_NAME=app
+```
+run 
+`docker compose up -d` 
+
+### Tech Stack:
 * [PostgreSQL](https://www.postgresql.org/docs/) for the database
 * [FastAPI](https://fastapi.tiangolo.com/) as the server
 * [Celery](https://docs.celeryq.dev/en/stable/userguide/index.html) for background tasks
